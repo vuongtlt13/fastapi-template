@@ -1,0 +1,9 @@
+.vscode
+.mypy_cache
+docker-stack.yml
+venv
+__pycache__
+.idea
+poetry.lock
+data
+.env
