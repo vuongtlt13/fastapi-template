@@ -3,12 +3,12 @@ from typing import Any, Dict, Optional, Union
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash, verify_password
-from app.repositories.base import CRUDBase
+from app.repositories.base import BaseRepository
 from app.models.partner import Partner
 from app.schemas.partner import PartnerCreate, PartnerUpdate
 
 
-class CRUDPartner(CRUDBase[Partner, PartnerCreate, PartnerUpdate]):
+class PartnerRepository(BaseRepository[Partner, PartnerCreate, PartnerUpdate]):
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,

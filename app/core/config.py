@@ -4,7 +4,7 @@ from pydantic import AnyHttpUrl, AnyUrl, BaseSettings, EmailStr, HttpUrl, valida
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
+    API_STR: str = "/api"
 
     SECRET_KEY: str
 
