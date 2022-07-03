@@ -1,7 +1,7 @@
-from sqlalchemy import Boolean, Column, String, BigInteger, TIMESTAMP, Text
-from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy import Column, String, BigInteger, Text
 
-from app.db.base_class import Base
+from app.core.model import Base
+from app.core.string import random_string
 
 
 class Partner(Base):
@@ -13,5 +13,5 @@ class Partner(Base):
     tax_code = Column(String(255), unique=True, nullable=False)
     description = Column(Text(), nullable=True)
 
-    api_key = Column(String(255), unique=True, nullable=False)
-    api_secret = Column(String(255), nullable=False)
+    api_key = Column(String(255), unique=True, nullable=False, default=random_string)
+    api_secret = Column(String(255), nullable=False, default=random_string)

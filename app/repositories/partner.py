@@ -1,11 +1,11 @@
 from typing import Any, Dict, Optional, Union
 
+from app.schemas.partner import PartnerCreate, PartnerUpdate
 from sqlalchemy.orm import Session
 
+from app.core.repository import BaseRepository
 from app.core.security import get_password_hash, verify_password
-from app.repositories.base import BaseRepository
 from app.models.partner import Partner
-from app.schemas.partner import PartnerCreate, PartnerUpdate
 
 
 class PartnerRepository(BaseRepository[Partner, PartnerCreate, PartnerUpdate]):
@@ -22,7 +22,7 @@ class PartnerRepository(BaseRepository[Partner, PartnerCreate, PartnerUpdate]):
         return db_obj
 
     def update(
-        self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
+            self, db: Session, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]
     ) -> User:
         if isinstance(obj_in, dict):
             update_data = obj_in

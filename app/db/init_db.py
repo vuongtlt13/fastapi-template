@@ -18,8 +18,9 @@ def init_db(db: Session) -> None:
     user = repositories.user.get_by_email(db, email=settings.FIRST_SUPERUSER)
     if not user:
         user_in = schemas.UserCreate(
-            email=settings.FIRST_SUPERUSER,
+            username=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
-            is_superuser=True,
+            full_name="Admin",
+            is_admin=True,
         )
         user = repositories.user.create(db, obj_in=user_in)  # noqa: F841

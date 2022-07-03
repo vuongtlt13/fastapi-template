@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD: str
     MYSQL_DATABASE: str
     SQLALCHEMY_DATABASE_URI: Optional[AnyUrl] = None
+    SQLALCHEMY_DEBUG: bool = False
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
@@ -75,7 +76,7 @@ class Settings(BaseSettings):
         )
 
     EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
-    FIRST_SUPERUSER: EmailStr
+    FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: str
     USERS_OPEN_REGISTRATION: bool = False
 

@@ -11,11 +11,15 @@ migration-generate:
 generate-secret:
 	python ./app/scripts/generate_secret_key.py
 
+db-seed:
+	python ./app/scripts/initial_data.py
+
 start-app:
-	uvicorn app.main:app --reload
+	uvicorn main:app --reload
 
 start-worker:
 	python ./app/scripts/celeryworker_pre_start.py && celery worker -A app.worker -l info -Q main-queue -c 1
 
 dev:
 	make start-worker && make start-app
+
