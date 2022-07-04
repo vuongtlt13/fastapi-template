@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db import base  # noqa: F401
 from app.repositories.user import user_repo
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreateRequest
 
 
 # make sure all SQL Alchemy models are imported (app.db.base) before initializing DB
@@ -16,9 +16,9 @@ def init_db(db: Session) -> None:
     # the tables un-commenting the next line
     # Base.metadata.create_all(bind=engine)
 
-    user = user_repo.get_by_username(db, username=settings.FIRST_SUPERUSER)
+    user = user_repo.find_by_columns(db, username=settings.FIRST_SUPERUSER)
     if not user:
-        user_in = UserCreate(
+        user_in = UserCreateRequest(
             username=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             full_name="Admin",

@@ -1,22 +1,22 @@
 from typing import Any, List
 
-from fastapi import Body, Depends, HTTPException, APIRouter, status
+from fastapi import Body, Depends, HTTPException, APIRouter, Response
 from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.mail import send_new_account_email
+from app.core.response import success_response, error_response
 from app.dependency import common
 from app.models.user import User
 from app.repositories.user import user_repo
-from app.schemas.user import UserUpdate, UserSchema, UserCreate
+from app.schemas.user import UserUpdateRequest, UserInfo, UserCreateRequest, UserResponse
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[UserSchema])
-def read_users(
+@router.get("/", response_model=List[UserInfo])
+def get_users(
         db: Session = Depends(common.get_db),
         skip: int = 0,
         limit: int = 100,
@@ -29,31 +29,36 @@ def read_users(
     return users
 
 
-@router.post("/", response_model=UserSchema)
+@router.post("/", response_model=UserResponse)
 def create_user(
         *,
         db: Session = Depends(common.get_db),
-        user_in: UserCreate,
+        user_in: UserCreateRequest,
         current_user: User = Depends(common.get_current_active_superuser),
+        response: Response
 ) -> Any:
     """
     Create new user.
     """
-    user = user_repo.find_by_columns(db, username=user_in.username)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this username already exists in the system.",
+    try:
+        user = user_repo.create(db, obj_in=user_in)
+        # if settings.EMAILS_ENABLED and user_in.email:
+        #     send_new_account_email(
+        #         email_to=user_in.email, username=user_in.email, password=user_in.password
+        #     )
+        return success_response(
+            message="Create new user successfully!",
+            data=user,
+            response=response,
         )
-    user = user_repo.create(db, obj_in=user_in)
-    if settings.EMAILS_ENABLED and user_in.email:
-        send_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+    except Exception as e:
+        return error_response(
+            message=f"Create new user failed! {str(e)}",
+            response=response
         )
-    return user
 
 
-@router.put("/me", response_model=UserSchema)
+@router.put("/me", response_model=UserInfo)
 def update_user_me(
         *,
         db: Session = Depends(common.get_db),
@@ -66,7 +71,7 @@ def update_user_me(
     Update own user.
     """
     current_user_data = jsonable_encoder(current_user)
-    user_in = UserUpdate(**current_user_data)
+    user_in = UserUpdateRequest(**current_user_data)
     if password is not None:
         user_in.password = password
     if full_name is not None:
@@ -77,7 +82,7 @@ def update_user_me(
     return user
 
 
-@router.get("/me", response_model=UserSchema)
+@router.get("/me", response_model=UserInfo)
 def read_user_me(
         db: Session = Depends(common.get_db),
         current_user: User = Depends(common.get_current_active_user),
@@ -88,7 +93,7 @@ def read_user_me(
     return current_user
 
 
-@router.post("/open", response_model=UserSchema)
+@router.post("/open", response_model=UserInfo)
 def create_user_open(
         *,
         db: Session = Depends(common.get_db),
@@ -110,12 +115,12 @@ def create_user_open(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
-    user_in = UserCreate(password=password, email=email, full_name=full_name)
+    user_in = UserCreateRequest(password=password, email=email, full_name=full_name)
     user = user_repo.create(db, obj_in=user_in)
     return user
 
 
-@router.get("/{user_id}", response_model=UserSchema)
+@router.get("/{user_id}", response_model=UserInfo)
 def read_user_by_id(
         user_id: int,
         current_user: User = Depends(common.get_current_active_user),
@@ -127,19 +132,20 @@ def read_user_by_id(
     user = user_repo.find(db, id=user_id)
     if user == current_user:
         return user
-    if not user_repo.is_superuser(current_user):
+
+    if not user_repo.is_admin(current_user):
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return user
 
 
-@router.put("/{user_id}", response_model=UserSchema)
+@router.put("/{user_id}", response_model=UserInfo)
 def update_user(
         *,
         db: Session = Depends(common.get_db),
         user_id: int,
-        user_in: UserUpdate,
+        user_in: UserUpdateRequest,
         current_user: User = Depends(common.get_current_active_superuser),
 ) -> Any:
     """

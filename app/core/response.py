@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from typing import Dict
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -30,12 +30,25 @@ class BadPayloadException(VHTTPException):
         )
 
 
-def success_response(message: str, data: Any, errors: Any = None, status_code: int = status.HTTP_200_OK) -> Dict:
+def success_response(response: Response, message: str, data: Any, errors: Any = None,
+                     status_code: int = status.HTTP_200_OK) -> Dict:
+    response.status_code = status_code
     return {
-        message: message,
-        data: data,
-        errors: errors,
-        status_code: status_code
+        "success": True,
+        "message": message,
+        "data": data,
+        "errors": errors,
+    }
+
+
+def error_response(response: Response, message: str, data: Any = None, errors: Any = None,
+                   status_code: int = status.HTTP_400_BAD_REQUEST) -> Dict:
+    response.status_code = status_code
+    return {
+        "success": False,
+        "message": message,
+        "data": data,
+        "errors": errors,
     }
 
 

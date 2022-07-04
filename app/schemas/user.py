@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
+from app.core.response import ResponseSchema
+
 
 # Shared properties
 class UserBase(BaseModel):
@@ -12,18 +14,6 @@ class UserBase(BaseModel):
     is_admin: Optional[bool] = False
 
 
-# Properties to receive via API on creation
-class UserCreate(UserBase):
-    username: str
-    password: str
-    full_name: str
-
-
-# Properties to receive via API on update
-class UserUpdate(UserBase):
-    password: Optional[str] = None
-
-
 class UserInDBBase(UserBase):
     id: Optional[int] = None
 
@@ -32,10 +22,24 @@ class UserInDBBase(UserBase):
 
 
 # Additional properties to return via API
-class UserSchema(UserInDBBase):
+class UserInfo(UserInDBBase):
     pass
 
 
-# Additional properties stored in DB
-class UserInDB(UserInDBBase):
-    hashed_password: str
+# region Request/Response Schema
+# Properties to receive via API on creation
+class UserCreateRequest(UserBase):
+    username: str
+    password: str
+    full_name: str
+
+
+# Properties to receive via API on update
+class UserUpdateRequest(UserBase):
+    password: Optional[str] = None
+
+
+# Response Schema
+class UserResponse(ResponseSchema):
+    data: Optional[UserInfo]
+# endregion

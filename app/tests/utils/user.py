@@ -6,12 +6,12 @@ from sqlalchemy.orm import Session
 from app import repositories
 from app.core.config import settings
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreateRequest, UserUpdateRequest
 from app.tests.utils.utils import random_email, random_lower_string
 
 
 def user_authentication_headers(
-    *, client: TestClient, email: str, password: str
+        *, client: TestClient, email: str, password: str
 ) -> Dict[str, str]:
     data = {"username": email, "password": password}
 
@@ -25,13 +25,13 @@ def user_authentication_headers(
 def create_random_user(db: Session) -> User:
     email = random_email()
     password = random_lower_string()
-    user_in = UserCreate(username=email, email=email, password=password)
+    user_in = UserCreateRequest(username=email, email=email, password=password)
     user = repositories.user.create(db=db, obj_in=user_in)
     return user
 
 
 def authentication_token_from_email(
-    *, client: TestClient, email: str, db: Session
+        *, client: TestClient, email: str, db: Session
 ) -> Dict[str, str]:
     """
     Return a valid token for the user with given email.
@@ -41,10 +41,10 @@ def authentication_token_from_email(
     password = random_lower_string()
     user = repositories.user.get_by_email(db, email=email)
     if not user:
-        user_in_create = UserCreate(username=email, email=email, password=password)
+        user_in_create = UserCreateRequest(username=email, email=email, password=password)
         user = repositories.user.create(db, obj_in=user_in_create)
     else:
-        user_in_update = UserUpdate(password=password)
+        user_in_update = UserUpdateRequest(password=password)
         user = repositories.user.update(db, db_obj=user, obj_in=user_in_update)
 
     return user_authentication_headers(client=client, email=email, password=password)

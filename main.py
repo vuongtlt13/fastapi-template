@@ -14,6 +14,9 @@ app = FastAPI(
         '200': {
             "model": SuccessResponseSchema
         },
+        '400': {
+            "model": ErrorResponseSchema
+        },
         '401': {
             "model": ErrorResponseSchema
         },
