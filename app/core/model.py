@@ -29,3 +29,19 @@ class Base:
     def updated_at(self):
         return Column(DateTime(timezone=True), server_default=func.now(),
                       default=func.now(), nullable=False, onupdate=func.now())
+
+
+class AuthenticatableModel:
+    password: Any
+
+    @declared_attr
+    def is_authenticatable(self) -> bool:
+        return True
+
+    @staticmethod
+    def username_column() -> str:
+        return "email"
+
+    @declared_attr
+    def username(self) -> str:
+        return getattr(self, self.username_column())

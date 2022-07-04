@@ -3,34 +3,18 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Session
 
 from app.core import security
 from app.core.config import settings
 from app.core.mail import send_reset_password_email
+from app.core.model import AuthenticatableModel
 from app.core.repository import BaseRepository
 from app.core.response import ResponseSchema
 from app.core.security import generate_password_reset_token, verify_password_reset_token, get_password_hash, \
     verify_password
 from app.dependency import common
 from app.schemas.token import Token
-
-
-class AuthenticatableModel:
-    password: Any
-
-    @declared_attr
-    def is_authenticatable(self) -> bool:
-        return True
-
-    @staticmethod
-    def username_column() -> str:
-        return "email"
-
-    @declared_attr
-    def username(self) -> str:
-        return getattr(self, self.username_column())
 
 
 def authenticate(

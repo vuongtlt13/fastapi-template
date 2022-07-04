@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, String, BigInteger
 
-from app.core.auth import AuthenticatableModel
-from app.core.model import Base
+from app.core.model import Base, AuthenticatableModel
 
 
 class User(Base, AuthenticatableModel):
