@@ -24,7 +24,7 @@ async def get_users(
     """
     Retrieve users.
     """
-    return user_datatable.render(db, response)
+    return await user_datatable.render(db, response)
 
 
 @router.post("/", response_model=UserResponse)

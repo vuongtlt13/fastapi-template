@@ -154,15 +154,14 @@ class BaseDataTable(ModifiedDatatableAction):
     def modified_datatable(self):
         raise NotImplementedError
 
-    def render(self, db: Session, response: Response, extra: Dict = None) -> Any:
+    async def render(self, db: Session, response: Response, extra: Dict = None) -> Any:
         # before call action
         self.session = db
         self.query_statement = self.query()
 
         # call action and get result
         if self.option.action == Action.AJAX:
-            result = self._call_ajax(
-                db=db,
+            result = await self._call_ajax(
                 response=response,
                 extra=extra
             )
@@ -174,11 +173,11 @@ class BaseDataTable(ModifiedDatatableAction):
         self.query_statement = None
         return result
 
-    def _call_ajax(self, db: Session, response: Response, extra: Dict = None) -> Dict:
+    async def _call_ajax(self, response: Response, extra: Dict = None) -> Dict:
         try:
             self._prepare_query()
-            result = self._results()
-            result = self._process_result(result)
+            result = await self._results()
+            result = await self._process_result(result)
             return self._render_result(result, response=response, extra=extra)
         except Exception as e:
             LOGGER.error(str(e))
@@ -246,7 +245,7 @@ class BaseDataTable(ModifiedDatatableAction):
             self.query_statement = self.query_statement.offset(offset)
         self.query_statement = self.query_statement.limit(self.option.limit)
 
-    def _results(self):
+    async def _results(self):
         return self.query_statement.all()
 
     def _render_result(self, result, response: Response, extra: Dict = None):
@@ -262,17 +261,17 @@ class BaseDataTable(ModifiedDatatableAction):
             message=""
         )
 
-    def _process_result(self, records: List):
+    async def _process_result(self, records: List):
         start = self._start_index
         for record in records:
-            self._add_column(record)
+            await self._add_column(record)
             if self.include_index[0]:
                 start += 1
                 setattr(record, self.include_index[1], start)
 
         return records
 
-    def _add_column(self, record):
+    async def _add_column(self, record):
         for column_name, producer in self.additional_cols:
             value = producer(record)
             setattr(record, column_name, value)
