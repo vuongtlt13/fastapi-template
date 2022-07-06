@@ -17,6 +17,18 @@ db-seed:
 start-app:
 	uvicorn main:app --reload
 
+ifeq ($(WORKER),)
+WORKER := 1
+endif
+ifeq ($(HOST),)
+HOST := 127.0.0.1
+endif
+ifeq ($(PORT),)
+PORT := 8000
+endif
+start-production:
+	gunicorn main:app --workers $(WORKER) --worker-class uvicorn.workers.UvicornWorker --bind $(HOST):$(PORT)
+
 start-worker:
 	python ./app/scripts/celeryworker_pre_start.py && celery worker -A app.worker -l info -Q main-queue -c 1
 

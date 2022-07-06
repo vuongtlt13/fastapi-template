@@ -40,6 +40,7 @@ class Base:
 
 
 class AuthenticatableModel:
+    id: Any
     password: Any
 
     @declared_attr

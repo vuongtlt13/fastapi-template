@@ -22,7 +22,7 @@ class VHTTPException(Exception):
 
 
 class BadPayloadException(VHTTPException):
-    def __int__(self, message: str, errors: Any):
+    def __init__(self, message: str, errors: Any = None):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             message=message,
@@ -102,6 +102,18 @@ def init_app(app: FastAPI):
                 "errors": exc.errors()
             }),
         )
+
+    # @app.exception_handler(Exception)
+    # async def custom_exception_handler(request: Request, exc: Exception):
+    #     return JSONResponse(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         content=jsonable_encoder({
+    #             "message": str(exc),
+    #             "success": False,
+    #             "data": None,
+    #             "errors": None
+    #         }),
+    #     )
 
 
 class ResponseSchema(BaseModel):

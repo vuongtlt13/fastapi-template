@@ -42,9 +42,11 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = user_repo.find_by_columns(db, username=token_data.sub)
+
+    user = user_repo.find_by_columns(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     return user
 
 

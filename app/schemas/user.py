@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
 
+from app.core.datatable import DataTableResult
 from app.core.response import ResponseSchema
 
 
@@ -23,6 +24,8 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class UserInfo(UserInDBBase):
+    full_name_extra: Optional[str]
+    stt: int
     pass
 
 
@@ -42,4 +45,15 @@ class UserUpdateRequest(UserBase):
 # Response Schema
 class UserResponse(ResponseSchema):
     data: Optional[UserInfo]
+
+
+# endregion
+
+# region datatable
+class UserDataTableResult(DataTableResult):
+    items: List[UserInfo]
+
+
+class UserDatatableResponse(ResponseSchema):
+    data: UserDataTableResult
 # endregion

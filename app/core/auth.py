@@ -65,7 +65,7 @@ def make_auth_router(
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         return {
             "access_token": security.create_access_token(
-                user.username,
+                user.id,
                 expires_delta=access_token_expires
             ),
             "token_type": "bearer",

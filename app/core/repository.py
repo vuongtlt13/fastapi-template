@@ -81,5 +81,4 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def filter_by(self, db: Session, clauses: Dict[str, Any]) -> Query:
         query = db.query(self.model)
         query.filter_by(**clauses)
-        print(clauses)
         return query
