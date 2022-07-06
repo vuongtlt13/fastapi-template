@@ -24,8 +24,6 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class UserInfo(UserInDBBase):
-    full_name_extra: Optional[str]
-    stt: int
     pass
 
 
@@ -50,8 +48,13 @@ class UserResponse(ResponseSchema):
 # endregion
 
 # region datatable
+class UserRecord(UserInfo):
+    full_name_extra: Optional[str]
+    stt: int
+
+
 class UserDataTableResult(DataTableResult):
-    items: List[UserInfo]
+    items: List[UserRecord]
 
 
 class UserDatatableResponse(ResponseSchema):

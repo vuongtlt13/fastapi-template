@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 
 from app.core.datatable import UseDatatable
 from app.core.logger import LOGGER
-from app.core.response import success_response, error_response
+from app.core.response import success_response, error_response, SuccessResponseSchema
 from app.datatables.user import UserDataTable
 from app.dependency import common
 from app.repositories.user import user_repo
-from app.schemas.user import UserUpdateRequest, UserInfo, UserCreateRequest, UserResponse, UserDatatableResponse
+from app.schemas.user import UserUpdateRequest, UserCreateRequest, UserResponse, UserDatatableResponse
 
 router = APIRouter()
 
@@ -28,7 +28,7 @@ async def get_users(
 
 
 @router.post("/", response_model=UserResponse)
-def create_user(
+async def create_user(
         *,
         db: Session = Depends(common.get_db),
         response: Response,
@@ -51,8 +51,8 @@ def create_user(
         )
 
 
-@router.get("/{id}", response_model=UserInfo)
-def read_user_by_id(
+@router.get("/{id}", response_model=UserResponse)
+async def read_user_by_id(
         *,
         db: Session = Depends(common.get_db),
         response: Response,
@@ -74,8 +74,8 @@ def read_user_by_id(
     )
 
 
-@router.put("/{id}", response_model=UserInfo)
-def update_user(
+@router.put("/{id}", response_model=UserResponse)
+async def update_user(
         *,
         db: Session = Depends(common.get_db),
         response: Response,
@@ -106,13 +106,12 @@ def update_user(
         )
 
 
-@router.delete("/{id}", response_model=UserInfo)
-def update_user(
+@router.delete("/{id}", response_model=SuccessResponseSchema)
+async def remove_user(
         *,
         db: Session = Depends(common.get_db),
         response: Response,
         id: int,
-        user_in: UserUpdateRequest,
 ) -> Any:
     """
     Update a user.
@@ -125,14 +124,14 @@ def update_user(
         )
 
     try:
-        user = user_repo.update(db, db_obj=user, obj_in=user_in)
+        user_repo.remove(db, id=id, model=user)
         return success_response(
-            message="Update user successfully!",
-            data=user,
+            message="Remove user successfully!",
+            data=None,
             response=response,
         )
     except Exception as e:
         return error_response(
-            message=f"Update user failed! {str(e)}",
+            message=f"Remove user failed! {str(e)}",
             response=response
         )

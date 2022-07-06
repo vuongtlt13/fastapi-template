@@ -1,19 +1,17 @@
 import inspect
-import logging
 from typing import Any, Dict, Generic, List, Optional, Type, Union
 from typing import TypeVar
 
 from pydantic import BaseModel
 from sqlalchemy import and_
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session
 
+from app.core.logger import LOGGER
 from app.core.model import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
-
-logger = logging.getLogger("uvicorn")
 
 
 class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
@@ -37,12 +35,12 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         filter_condition = and_(*[attr[column] == value for column, value in kwargs.items()])
         return db.query(self.model).filter(filter_condition).first()
 
-    def get_multi(
-            self, db: Session, *, skip: int = 0, limit: int = 100
+    def get(
+            self, db: Session, *filter_conditions
     ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+        return db.query(self.model).filter(*filter_conditions).all()
 
-    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
+    def create(self, db: Session, obj_in: CreateSchemaType) -> ModelType:
         try:
             db_obj: Base = self.model()
             db_obj.fill(obj_in)
@@ -50,35 +48,37 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db.commit()
             return db_obj
         except Exception as e:
-            logger.error(str(e))
+            LOGGER.error(str(e))
             db.rollback()
             raise
 
     def update(
             self,
             db: Session,
-            *,
             db_obj: ModelType,
             obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
         try:
             db_obj.fill(obj_in)
-            db.add(db_obj)
-            db.commit()
-            db.refresh(db_obj)
+            if db_obj.is_dirty():
+                db.add(db_obj)
+                db.commit()
+                db.refresh(db_obj)
             return db_obj
         except Exception as e:
-            logger.error(str(e))
+            LOGGER.error(str(e))
             db.rollback()
             return db_obj
 
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
-        db.delete(obj)
-        db.commit()
-        return obj
+    def remove(self, db: Session, id: int, model: ModelType = None) -> ModelType:
+        try:
+            if model is None:
+                model = db.query(self.model).get(id)
 
-    def filter_by(self, db: Session, clauses: Dict[str, Any]) -> Query:
-        query = db.query(self.model)
-        query.filter_by(**clauses)
-        return query
+            db.delete(model)
+            db.commit()
+            return model
+        except Exception as e:
+            LOGGER.error(str(e))
+            db.rollback()
+            return model
