@@ -9,6 +9,8 @@ from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from starlette.exceptions import HTTPException
 
+from app.core.logger import LOGGER
+
 
 class VHTTPException(Exception):
     def __init__(self, status_code: int, message: str = None, errors: Any = None) -> None:
@@ -103,17 +105,18 @@ def init_app(app: FastAPI):
             }),
         )
 
-    # @app.exception_handler(Exception)
-    # async def custom_exception_handler(request: Request, exc: Exception):
-    #     return JSONResponse(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         content=jsonable_encoder({
-    #             "message": str(exc),
-    #             "success": False,
-    #             "data": None,
-    #             "errors": None
-    #         }),
-    #     )
+    @app.exception_handler(Exception)
+    async def custom_exception_handler(request: Request, exc: Exception):
+        LOGGER.error(str(exc))
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=jsonable_encoder({
+                "message": "Unknown Error!",
+                "success": False,
+                "data": None,
+                "errors": None
+            }),
+        )
 
 
 class ResponseSchema(BaseModel):

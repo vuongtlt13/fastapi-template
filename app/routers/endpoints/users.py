@@ -37,18 +37,12 @@ async def create_user(
     """
     Create new user.
     """
-    try:
-        user = user_repo.create(db, obj_in=user_in)
-        return success_response(
-            message="Create new user successfully!",
-            data=user,
-            response=response,
-        )
-    except Exception as e:
-        return error_response(
-            message=f"Create new user failed! {str(e)}",
-            response=response
-        )
+    user = user_repo.create(db, obj_in=user_in)
+    return success_response(
+        message="Create new user successfully!",
+        data=user,
+        response=response,
+    )
 
 
 @router.get("/{id}", response_model=UserResponse)
@@ -92,18 +86,12 @@ async def update_user(
             message="User not found!",
         )
 
-    try:
-        user = user_repo.update(db, db_obj=user, obj_in=user_in)
-        return success_response(
-            message="Update user successfully!",
-            data=user,
-            response=response,
-        )
-    except Exception as e:
-        return error_response(
-            message=f"Update user failed! {str(e)}",
-            response=response
-        )
+    user = user_repo.update(db, db_obj=user, obj_in=user_in)
+    return success_response(
+        message="Update user successfully!",
+        data=user,
+        response=response,
+    )
 
 
 @router.delete("/{id}", response_model=SuccessResponseSchema)
@@ -123,15 +111,9 @@ async def remove_user(
             message="User not found!",
         )
 
-    try:
-        user_repo.remove(db, id=id, model=user)
-        return success_response(
-            message="Remove user successfully!",
-            data=None,
-            response=response,
-        )
-    except Exception as e:
-        return error_response(
-            message=f"Remove user failed! {str(e)}",
-            response=response
-        )
+    user_repo.remove(db, id=id, model=user)
+    return success_response(
+        message="Remove user successfully!",
+        data=None,
+        response=response,
+    )

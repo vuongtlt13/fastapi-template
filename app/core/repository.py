@@ -68,7 +68,7 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         except Exception as e:
             LOGGER.error(str(e))
             db.rollback()
-            return db_obj
+            raise
 
     def remove(self, db: Session, id: int, model: ModelType = None) -> ModelType:
         try:
@@ -81,4 +81,4 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         except Exception as e:
             LOGGER.error(str(e))
             db.rollback()
-            return model
+            raise
