@@ -1,7 +1,7 @@
 import abc
 import logging
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from logging import Logger
 from typing import TypeVar, List, Any, Dict, Optional, Type, Callable, Union, Tuple
@@ -69,6 +69,7 @@ class DataTableOption:
     page: int = 1
     limit: int = DEFAULT_LIMIT
     action: Action = Action.AJAX
+    others: Dict[str, Any] = field(default_factory=dict)
 
 
 class IBaseDataTable:
