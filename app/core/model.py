@@ -94,6 +94,6 @@ class AuthenticatableModel:
     def username_column() -> str:
         return "email"
 
-    @declared_attr
-    def username(self) -> str:
-        return getattr(self, self.username_column())
+    # @declared_attr
+    # def username(self) -> str:
+    #     return getattr(self, self.username_column())
