@@ -57,7 +57,8 @@ class Action(str, Enum):
 
 
 class DataTableResult(BaseModel):
-    recordsTotal: int
+    totalRecords: int
+    filteredRecords: int
     items: List[Any]
     others: Dict[str, Any]
 
@@ -141,6 +142,7 @@ class BaseDataTable(ModifiedDatatableAction):
         # result
         self.prepared = False
         self.total_record: Optional[int] = None
+        self.filtered_record: Optional[int] = None
 
     @staticmethod
     @abc.abstractmethod
@@ -246,7 +248,8 @@ class BaseDataTable(ModifiedDatatableAction):
             self.query_statement = self.query_statement.offset(offset)
         self.query_statement = self.query_statement.limit(self.option.limit)
 
-    async def _results(self):
+    async def _results(self) -> List[Any]:
+        self.filtered_record = self.query_statement.count()
         return self.query_statement.all()
 
     def _render_result(self, result, response: Response, extra: Dict = None):
@@ -255,7 +258,8 @@ class BaseDataTable(ModifiedDatatableAction):
         return success_response(
             response=response,
             data={
-                "recordsTotal": self.total_record,
+                "totalRecords": self.total_record,
+                "filteredRecords": self.filtered_record,
                 "items": result,
                 "others": extra
             },
